@@ -1,0 +1,12 @@
+# Prevent Apache from replacing PHP 500 errors with its own HTML error page
+# so our JSON error responses always reach the client
+php_flag display_errors Off
+php_flag log_errors On
+
+# Pass PHP errors through as-is (don't let Apache intercept)
+PassEnv APP_ENV DB_HOST DB_NAME DB_USER DB_PASS DB_PORT
+
+# Rewrite: route everything to index.html except api.php and static assets
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(?!api\.php) /index.html [L]

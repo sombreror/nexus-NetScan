@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="NEXUS NetScan v3 — Cyber Network Dashboard">
+<title>NEXUS // NETSCAN v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app" class="shell">
+
+  <header class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-logo-mark"></div>
+      <div><div class="hdr-title">NEXUS <span>// NETSCAN v3</span></div></div>
+    </div>
+    <div class="hdr-status">
+      <div class="badge"><div class="badge-dot"></div> ONLINE</div>
+      <div class="clock" id="js-clock">00:00:00</div>
+      <div class="badge cyan" id="js-reqcount">0 REQ</div>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('dashboard',this)">▣ Dashboard</button>
+    <button class="nav-btn" onclick="showPage('tools',this)">⚙ Tools</button>
+    <button class="nav-btn" onclick="showPage('conncheck',this)">🛡 Conn Security</button>
+    <button class="nav-btn" onclick="showPage('logs',this)">≡ Logs</button>
+  </nav>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="section-title">System Overview</div>
+      <div class="stat-row">
+        <div class="stat-card" data-icon="∑"><div class="stat-lbl">Total Ops</div><div class="stat-val cyan" id="s-total">—</div><div class="stat-sub" id="s-today-sub">loading...</div></div>
+        <div class="stat-card" data-icon="✓"><div class="stat-lbl">Success</div><div class="stat-val green" id="s-success">—</div><div class="stat-sub">successful probes</div></div>
+        <div class="stat-card" data-icon="⚠"><div class="stat-lbl">Errors</div><div class="stat-val red" id="s-errors">—</div><div class="stat-sub">failed probes</div></div>
+        <div class="stat-card" data-icon="◉"><div class="stat-lbl">Today</div><div class="stat-val amber" id="s-today">—</div><div class="stat-sub">ops today</div></div>
+        <div class="stat-card" data-icon="%"><div class="stat-lbl">Success Rate</div><div class="stat-val cyan" id="s-rate">—</div><div class="stat-sub">overall</div></div>
+      </div>
+      <div class="two-col">
+        <div class="panel"><div class="panel-hdr">Recent Activity</div><div class="panel-body" id="js-feed"><div class="loading-msg">Loading...</div></div></div>
+        <div class="panel"><div class="panel-hdr">Tool Usage</div><div class="panel-body" id="js-bars"><div class="loading-msg">Loading...</div></div></div>
+      </div>
+    </section>
+
+    <!-- TOOLS -->
+    <section class="page" id="page-tools">
+      <div class="section-title">Network Tools</div>
+      <div class="tools-grid" id="js-tools-grid"></div>
+    </section>
+
+    <!-- CONNECTION SECURITY -->
+    <section class="page" id="page-conncheck">
+      <div class="section-title">Connection Security Scan</div>
+      <div class="cc-desc">Analyzes your current browser connection — HTTPS status, latency, IP info, browser security features and risk score.</div>
+      <div id="cc-container">
+        <div class="cc-loading">
+          <div class="spinner" style="width:20px;height:20px;border-width:3px"></div>
+          <span>Click "Conn Security" tab to scan...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGS -->
+    <section class="page" id="page-logs">
+      <div class="section-title">Operation Logs</div>
+      <div class="panel">
+        <div class="log-controls">
+          <select id="log-level" class="log-select" onchange="loadLogs(1)">
+            <option value="ALL">All Levels</option>
+            <option value="SUCCESS">Success</option>
+            <option value="INFO">Info</option>
+            <option value="WARN">Warn</option>
+            <option value="ERROR">Error</option>
+          </select>
+          <select id="log-tool" class="log-select" onchange="loadLogs(1)">
+            <option value="ALL">All Tools</option>
+            <option value="ping">Ping</option>
+            <option value="dns">DNS</option>
+            <option value="traceroute">Traceroute</option>
+            <option value="whois">WHOIS</option>
+            <option value="ssl">SSL</option>
+            <option value="headers">HTTP Headers</option>
+            <option value="uptime">Uptime</option>
+            <option value="latency">Latency</option>
+            <option value="ipinfo">IP Info</option>
+            <option value="subdomains">Subdomains</option>
+            <option value="status">Status</option>
+            <option value="portscan">Port Scan</option>
+            <option value="redirect">Redirect</option>
+          </select>
+          <input type="text" id="log-search" class="log-search" placeholder="Filter target..." oninput="loadLogs(1)">
+          <button class="btn-refresh" onclick="loadLogs(App.logPage)">↻ Refresh</button>
+          <button class="btn-export" onclick="exportLogs()">⬇ CSV</button>
+          <span class="log-count" id="log-count">—</span>
+        </div>
+        <div class="tbl-wrap">
+          <table class="log-tbl">
+            <thead><tr><th>Time</th><th>Level</th><th>Tool</th><th>Target</th><th>IP</th><th>ms</th><th></th></tr></thead>
+            <tbody id="log-tbody"><tr><td colspan="7" class="loading-msg">Loading...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="log-pages"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span><span class="footer-brand">NEXUS</span> // NetScan v3 · Open Access</span>
+    <span id="js-myip">IP: —</span>
+    <span>Network Intelligence Dashboard</span>
+  </footer>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="modal-overlay" id="js-modal" onclick="onModalOverlay(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">RESULT</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <pre class="modal-body" id="modal-body"></pre>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: db
+      DB_NAME: nexus
+      DB_USER: nexus_user
+      DB_PASS: change_me_in_production
+      DB_PORT: 3306
+      RATE_LIMIT: 30
+      RATE_WINDOW: 60
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: nexus
+      MYSQL_USER: nexus_user
+      MYSQL_PASSWORD: change_me_in_production
+      MYSQL_ROOT_PASSWORD: root_change_me
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  db_data:
